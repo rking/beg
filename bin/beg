@@ -1,0 +1,4 @@
+#!/usr/bin/env ruby
+## bundle exec guard + bonus workflow menu
+require 'beg'
+Beg.cli ARGV

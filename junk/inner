@@ -1,0 +1,19 @@
+#!/usr/bin/env ruby
+# encoding: utf-8
+alias actual_puts puts
+def puts line
+  actual_puts "[Child pid: #$$ pgrp: #{Process.getpgrp}] #{line}"
+end
+# Heh, these may try to write an fd they can't write.
+# trap :TTOU do puts 'TTOU' end
+# trap :TTIN do puts 'TTOU' end
+$stdin = open '/dev/tty'
+fail unless $stdin
+require 'termios'
+p [ :getpgrp, Process.getpgrp, :pid, $$ ]
+r = Termios.tcsetpgrp $stdin, Process.getpgrp
+p [ :r, r ]
+p [ :tcgetpgrp, Termios.tcgetpgrp($stdin) ]
+puts "Now hit ^j, ^c or ^z…"
+x = $stdin.readline
+puts "Got #{x}"

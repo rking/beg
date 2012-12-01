@@ -1,0 +1,21 @@
+#!/usr/bin/env ruby
+alias actual_puts puts
+def puts line
+  actual_puts "[Parent] #{line}"
+end
+trap :CHLD do
+  puts '(SIGCHLD)'
+end
+
+trap :TSTP do
+  puts 'Odd. (SIGTSTP)'
+end
+
+puts 'Expecting the next command to be controllable from here.'
+kid_pid = spawn './inner', pgroup: true, in: __FILE__
+puts 'After spawn'
+$stdin.close
+
+Process.wait kid_pid
+puts $stdin.readline
+puts 'At last line of "outer"'
