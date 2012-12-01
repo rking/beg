@@ -1,6 +1,7 @@
 class Beg
   def self.cli argv
-    while system 'inotifywait', '-e', 'modify', Dir['**/*.rb']
+    loop do
+      system 'inotifywait', *Dir['**/*.rb']
       cmd = %w(bundle exec rake test)
       puts "Running #{cmd}"
       system cmd
