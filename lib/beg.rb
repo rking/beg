@@ -25,7 +25,12 @@ class Beg
   end
 
   def verbose_system cmd
-    puts "Running #{cmd.join ' '}"
+    str = color 36, cmd.join(' ')
+    puts "Running: " + str
     system *cmd
+  end
+
+  def color num, str
+    "\e[%dm%s\e[0m" % [num, str]
   end
 end
