@@ -9,11 +9,12 @@ class BegTest < MiniTest::Unit::TestCase
     beg.stub :verbose_system, -> *args {
       calls[:verbose_system] << args
     } do
-      File.stub :exists?, -> *args {
-        calls[:file_exists] = args
-        returns[:file_exists]
+      File.stub :exists?, -> *arg {
+        calls[:file_exists] = arg
+        r = returns[:file_exists]
+        returns[:file_exists][arg[0]]
       } do
-        Dir.stub :[], -> *args {
+        Dir.stub :glob, -> *args {
           calls[:dir_glob] << args
           returns[:dir_glob]
         } do
@@ -25,7 +26,7 @@ class BegTest < MiniTest::Unit::TestCase
   end
   def test_poor_mans
     calls = with_fake_system_interaction \
-      file_exists: false,
+      file_exists: {'Guardfile' => false},
       dir_glob: ['lib/foo.rb'] do |beg|
       beg.run
     end
@@ -36,11 +37,13 @@ class BegTest < MiniTest::Unit::TestCase
   end
 
   def test_with_guardfile
-    calls = with_fake_system_interaction file_exists: true do |beg|
+    calls = with_fake_system_interaction \
+      file_exists: {'Guardfile' => true} do |beg|
+      beg.argv = ['--someflag']
       beg.run
     end
     watch_cmd, test_cmd = calls[:verbose_system]
     assert_equal 'Guardfile', calls[:file_exists][0]
-    assert_equal [%w(bundle exec guard)], calls[:verbose_system][0]
+    assert_equal [%w(bundle exec guard --someflag)], calls[:verbose_system][0]
   end
 end

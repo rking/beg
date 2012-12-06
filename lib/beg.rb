@@ -1,4 +1,6 @@
 class Beg
+  attr_accessor :argv
+
   def self.cli argv
     Beg.new(argv).run
   end
@@ -14,12 +16,12 @@ class Beg
   end
 
   def run_with_guardfile
-    verbose_system %w(bundle exec guard)
+    verbose_system %w(bundle exec guard) + @argv
   end
 
   def run_poor_man_style
     loop do
-      verbose_system ['inotifywait'] + Dir['**/*.rb']
+      verbose_system ['inotifywait'] + Dir.glob('**/*.rb')
       verbose_system %w(bundle exec rake test)
     end
   end
